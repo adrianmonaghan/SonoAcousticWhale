@@ -161,4 +161,3 @@ cython_debug/
 
 *.wav
 *.flac
-*.pkl
