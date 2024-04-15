@@ -11,7 +11,7 @@ def uncompress(file):
 
 def main():
     start = time.time()
-    pool = multiprocessing.Pool(10)
+    pool = multiprocessing.Pool(7)
     files = os.listdir("D:/SonarData/flat")
     # for file in messing_files:
     #     uncompress(file)
