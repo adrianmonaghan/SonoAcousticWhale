@@ -37,19 +37,23 @@ these models.
 <p>
     We processed around 1,000 hours of audio data into spectrograms, totalling 4-6TB of raw audio. Given computation limitations,
      we were forced to use our own implementation of the short-time Fourier transform (STFT) as opposed to the original plan of re-using
-      the original paper’s acoustic front end. This ended up being beneficial as we are now able to control the entire data pipeline from
-       audio to classification. We took advantage of the additional metadata contained in the XWAV file format and only read and processed 225s chunks
-        of data as opposed to the entire 24 hour XWAV file. We then sliced the resulting spectrogram, which was longer than 256 time bins down to
-         center the labeled classification in the time axis. This was identified early on as a potential issue with the training data. This method
-          always places a whale call in a very similar y position, and therefore, would potentially only learn to detect whale songs that occur in the
-           middle of the spectrogram as opposed to whale songs that occur on the edges of spectrograms.
-We converted the audio files into spectrogram images using a similar method to the original paper. We passed the data through the STFT and PCEN layer. 
+    the original paper’s acoustic front end. This ended up being beneficial as we are now able to control the entire data pipeline from
+    audio to classification. We took advantage of the additional metadata contained in the XWAV file format and only read and processed 225s chunks
+    of data as opposed to the entire 24 hour XWAV file. We then sliced the resulting spectrogram, which was longer than 256 time bins down to
+    center the labeled classification in the time axis. This was identified early on as a potential issue with the training data. This method
+    always places a whale call in a very similar y position, and therefore, would potentially only learn to detect whale songs that occur in the
+    middle of the spectrogram as opposed to whale songs that occur on the edges of spectrograms.
+</p>
+<p>
+    We converted the audio files into spectrogram images using a similar method to the original paper. We passed the data through the STFT and PCEN layer. 
 Due to computational, storage, and time limitations, our STFT and PCEN used smaller window sizes than the original paper. Due to similar constraints, 
 the PCEN hyper parameters were unable to be trained by the model and instead were tuned manually with sample spectrograms. The PCEN algorithm used was 
 written in PyTorch to allow for better future integration with our current model [5]. The hyperparameters we decided on were: s=0.008, alpha=0.8, 
 delta=200, r=0.05, length of fast fourier transform window=4,096, number of mel frequency bins=256, hop length=300, hann window, and a minimum and maximum 
 frequency of 10Hz and 4kHz respectively. The PCEN specific hyperparameters were influenced heavily by the PCEN paper [8]. These hyperparameters were 
 found to be able to both emphasize whale calls and vessel noise.
+</p>
+<p>
 The spectrograms that are output are much larger and contain more information to learn than the original paper’s spectrogram of 128x96 pixels. We believe 
 that the intricacies of the different classes are separated by very small differences in pixels. Therefore, we believe the detail in the image will lead to 
 enough of a benefit in accuracy that it would outweigh the drawbacks of decreased data loading speed. These images (256 x 256 pixels), could then be fed into 
@@ -59,8 +63,11 @@ smaller convolutional networks: a basic convolutional network without residual c
 using smaller networks to see if we could get similar or better results. 
 The models were trained with support provided by Research Computer at Northeastern University [4]. The models were trained with 1 P100 GPU with a 28 core CPU with 
 access provided through the Undergraduate Courses Cluster.
-Our developed convolutional network used 19 layers (four groups of conv2d -> dropout -> ReLU -> batchnorm, followed by Avgpool, linear, and softmax layers)
- and 9152 parameters total, while the ResNet-18 architecture used 11.17M parameters.We weighted the cross entropy loss function inversely proportional to
+</p>
+<p>
+Our developed convolutional network used four blocks of [conv2d -> dropout -> ReLU -> batchnorm], followed by an avgpool. This yielded a [16, 1, 1] dimensional vector that 
+we then passed into a linear layer and softmax layer to yeild probabilities for each of our 4 output classes. This network had 9152 parameters total, while the ResNet-18 
+architecture used 11.17M parameters. We weighted the cross entropy loss function inversely proportional to
   the distribution of image classes in the training set. The class distribution was: 55.8% background, 0.8% fish, 2.1% vessel, and 41.3% whale. Thus, vessels
    and fish, which had significantly less images than whale and background in the training set, were weighted significantly more by the loss function. This solution
     is equivalent to balancing the distribution of images in each class, and allows us to find better classification barriers between the common and uncommon classes.
@@ -69,11 +76,19 @@ Our developed convolutional network used 19 layers (four groups of conv2d -> dro
 
 </p>
 <h2>4) Experimental Findings</h2>
-We found that our convolutional network was able to achieve an 87 % train accuracy and an 88 % validation accuracy. Our resnet-18 model
- was able to achieve an 89% train accuracy and an 89% validation accuracy.
-<p>ResNet-18</p>
+We found that our convolutional network was able to achieve an 87 % train accuracy and an 88 % validation accuracy. Our final version of the model with the highest
+ validation accuracy only made predictions on the two largest classes: background and fish. While adjusting the hyperparameters of the model (learning rate, weight
+  decay, batch size, etc.), we were only able to get some predictions on the two minority classes occassionally, but most times predictions were only made on the two
+   majority classes. This best performace came with a learning rate of 0.01, a weight decay of 0.0001, and a batch size of 512. Our model does a pretty good job of discriminating between the two major classes: background and whale have precisions of .93 and .90 respectively.
+</p>
+<p>
+Our resnet-18 model was able to achieve an 89% train accuracy and an 89% validation accuracy. This model was able to make predictions on the two minority classes, but
+had slightly worse performance on the two majority classes than our convolutional model did. The resnet-18 model had pretty good discriminability amoung all classes (each
+ class had more correct predictions than incorrect ones). This accuracy was also achieved after tuning of our various hyperparameters. Our convolutional network was able
+  to outperform resnet-18 in terms of precision for background and whale, while resnet-18 made slightly more misclassifications in both directions.
+<p>ResNet-18 Confusion Matrix</p>
  <img src="static/resnet18_conf_mat.png" width="25%">
-<p>Simple Model with 9,152 parameters</p>
+<p>Simple Model with 9,152 parameters Confusion Matrix</p>
  <img src="static/simple_model_conf_matpng.png" width="25%">
 
 <h2>5) Conclusions</h2>
