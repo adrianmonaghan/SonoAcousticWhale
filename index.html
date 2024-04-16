@@ -83,7 +83,8 @@ Our developed convolutional network used 19 layers (four groups of conv2d -> dro
 We found that our convolutional network was able to achieve an 87 % train accuracy and an 88 % validation accuracy. Our final version of the model with the highest
  validation accuracy only made predictions on the two largest classes: background and fish. While adjusting the hyperparameters of the model (learning rate, weight
   decay, batch size, etc.), we were only able to get some predictions on the two minority classes occassionally, but most times predictions were only made on the two
-   majority classes. This best performace came with a learning rate of 0.01, a weight decay of 0.0001, and a batch size of 512. Our model does a pretty good job of discriminating between the two major classes: background and whale have precisions of .93 and .90 respectively.
+   majority classes. This best performace came with a learning rate of 0.01, a weight decay of 0.0001, and a batch size of 512. Our model does a pretty good job of 
+   discriminating between the two major classes: background and whale have precisions of .93 and .90 respectively.
 </p>
 <p>
 Our resnet-18 model was able to achieve an 89% train accuracy and an 89% validation accuracy. This model was able to make predictions on the two minority classes, but
@@ -96,7 +97,16 @@ had slightly worse performance on the two majority classes than our convolutiona
  <img src="static/simple_model_conf_matpng.png" width="25%">
 
 <h2>5) Conclusions</h2>
-
+<p>
+    We were able to achieve success in using two smaller architectures to solve the problem of underwater acoustic classification. The simple model with 9,152 parameters was able 
+    to distinguish between whales and not whales. The ResNet-18 model was able to distinguish between whale and background and was also able to perform better than random on
+    classifying fish and vessel despite a very large class imbalance.  The ability to classify whale calls with small networks such as the one we provided could allow for low-cost,
+    on-device whale call classification anywhere. Given the moderate success of distinguishing vessel and fish noise from whales and background, we believe there is significant potential
+    in exploring additional machine learning architectures to solve this problem. Architectures such as a deeper ResNet, such as ResNet-34 or ResNet-50 could be interesting in exploring
+    additional classification classification power. We feel though that the biggest weakness in this experiment was the lack of data for Vessel and Fish. Exploring new methods for 
+    handling class imbalanced data could lead to potentially large growths. Additionally, the use of a GAN to artificially create spectrograms is another way to create more training data
+    for the classifier.
+</p>
 <h2>Bibliography</h2>
 <ol>
     <li>Allen AN, Harvey M, Harrell L, Jansen A, Merkens KP, Wall CC, Cattiau J and Oleson EM (2021) A Convolutional Neural Network for Automated Detection of Humpback Whale Song in a Diverse, Long-Term Passive Acoustic Dataset. Front. Mar. Sci. 8:607321. doi: 10.3389/fmars.2021.607321</li>
