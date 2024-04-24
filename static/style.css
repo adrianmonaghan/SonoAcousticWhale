@@ -1,6 +1,10 @@
 body, td, th {
   font-family: 'Open Sans', sans-serif;
 }
+body{
+  padding: 10px;
+  margin: 2px !important;
+}
 h2 {
   margin-top: 3ex;
 }
